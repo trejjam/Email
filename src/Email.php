@@ -77,7 +77,8 @@ class Email
 		return $this;
 	}
 	/**
-	 * @param string $from
+	 * @param string             $from
+	 * @param bool(false)|string $name
 	 * @return $this
 	 * @throw EmailException
 	 */
@@ -93,7 +94,8 @@ class Email
 		return $this;
 	}
 	/**
-	 * @param string $to
+	 * @param string             $to
+	 * @param bool(false)|string $name
 	 * @return $this
 	 * @throw EmailException
 	 */
