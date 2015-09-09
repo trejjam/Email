@@ -18,5 +18,5 @@ interface IEmailFactory
 	/**
 	 * @return Email
 	 */
-	function create($from, $fromName = FALSE, $locale = NULL);
+	function create($from, $fromName = NULL, $locale = NULL);
 }

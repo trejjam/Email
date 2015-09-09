@@ -117,9 +117,11 @@ class Send
 		$data = $email->get();
 
 		$mail = new Nette\Mail\Message;
-		$mail->setFrom($data->from)
-			 ->addTo($data->to)
-			 ->setHtmlBody($data->content);
+		$mail
+			->setFrom($data->from, $data->fromName)
+			->addReplyTo($data->replyTo, $data->replyToName)
+			->addTo($data->to, $data->toName)
+			->setHtmlBody($data->content);
 
 		if (isset($data->unsubscribeEmail) || isset($data->unsubscribeLink)) {
 			$mail->setHeader('List-Unsubscribe', (isset($data->unsubscribeEmail) ? '<mailto:' . $data->unsubscribeEmail . '>' : '') . (isset($data->unsubscribeEmail) && isset($data->unsubscribeLink) ? ", " : "") . (isset($data->unsubscribeLink) ? '<' . $data->unsubscribeLink . '>' : ''), TRUE);

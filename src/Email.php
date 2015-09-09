@@ -25,10 +25,12 @@ class Email
 	protected $linkGenerator;
 
 	protected $from;
-	protected $fromName = FALSE;
-	protected $to       = NULL;
-	protected $toName   = FALSE;
-	protected $subject  = "";
+	protected $fromName    = NULL;
+	protected $to          = NULL;
+	protected $toName      = NULL;
+	protected $replyTo     = NULL;
+	protected $replyToName = NULL;
+	protected $subject     = "";
 
 	protected $content = NULL;
 
@@ -39,7 +41,7 @@ class Email
 	protected $unsubscribeEmail = NULL;
 	protected $unsubscribeLink  = NULL;
 
-	function __construct($from, $fromName = FALSE, Nette\Bridges\ApplicationLatte\ILatteFactory $latteFactory, Nette\Application\LinkGenerator $linkGenerator)
+	function __construct($from, $fromName = NULL, Nette\Bridges\ApplicationLatte\ILatteFactory $latteFactory, Nette\Application\LinkGenerator $linkGenerator)
 	{
 		$this->from($from, $fromName);
 		$this->latteFactory = $latteFactory;
@@ -82,7 +84,7 @@ class Email
 	 * @return $this
 	 * @throw EmailException
 	 */
-	function from($from, $name = FALSE)
+	function from($from, $name = NULL)
 	{
 		if (!Nette\Utils\Validators::isEmail($from)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
@@ -99,7 +101,7 @@ class Email
 	 * @return $this
 	 * @throw EmailException
 	 */
-	function to($to, $name = FALSE)
+	function to($to, $name = NULL)
 	{
 		if (!Nette\Utils\Validators::isEmail($to)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
@@ -107,6 +109,23 @@ class Email
 
 		$this->to = $to;
 		$this->name = $name;
+
+		return $this;
+	}
+	/**
+	 * @param string             $to
+	 * @param bool(false)|string $name
+	 * @return $this
+	 * @throw EmailException
+	 */
+	function replyTo($to, $name = NULL)
+	{
+		if (!Nette\Utils\Validators::isEmail($to)) {
+			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
+		}
+
+		$this->replyTo = $to;
+		$this->replyToName = $name;
 
 		return $this;
 	}
@@ -166,10 +185,14 @@ class Email
 	function get($validate = TRUE)
 	{
 		$args = [
-			'from'    => $this->from,
-			'to'      => $this->to,
-			'subject' => $this->subject,
-			'content' => $this->content,
+			'from'        => $this->from,
+			'fromName'    => $this->fromName,
+			'to'          => $this->to,
+			'toName'      => $this->toName,
+			'replyTo'     => is_null($this->replyTo) ? $this->from : $this->replyTo,
+			'replyToName' => is_null($this->replyTo) ? $this->fromName : $this->replyToName,
+			'subject'     => $this->subject,
+			'content'     => $this->content,
 		];
 		if (!is_null($this->unsubscribeEmail)) {
 			$args['unsubscribeEmail'] = $this->unsubscribeEmail;
