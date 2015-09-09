@@ -184,6 +184,12 @@ class Email
 
 	function get($validate = TRUE)
 	{
+		$required = [
+			'from',
+			'to',
+			'subject',
+			'content',
+		];
 		$args = [
 			'from'        => $this->from,
 			'fromName'    => $this->fromName,
@@ -224,18 +230,13 @@ class Email
 			}
 		}
 
-		try {
+		if ($validate) {
 			if (in_array(NULL, $args)) {
-				foreach ($args as $k => $v) {
-					if (is_null($v)) {
-						throw new EmailException('Missing ' . $k, EmailException::MISS_PARAMETER);
+				foreach ($required as $v) {
+					if (is_null($args[$v])) {
+						throw new EmailException('Missing ' . $v, EmailException::MISS_PARAMETER);
 					}
 				}
-			}
-		}
-		catch (EmailException $e) {
-			if ($validate || $e->getCode() != EmailException::MISS_PARAMETER) {
-				throw $e;
 			}
 		}
 
