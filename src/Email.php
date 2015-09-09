@@ -163,7 +163,7 @@ class Email
 		return $this;
 	}
 
-	function get()
+	function get($validate = TRUE)
 	{
 		$args = [
 			'from'    => $this->from,
@@ -178,27 +178,41 @@ class Email
 			$args['unsubscribeLink'] = $this->unsubscribeLink;
 		}
 
-		if (is_null($this->content) && !is_null($this->template)) {
-			foreach ($this->templateArgsMinimum as $v) {
-				if (!isset($this->templateArgs[$v])) {
-					throw new EmailException('Missing templateArgs.' . $v, EmailException::MISS_PARAMETER);
+		try {
+			if (is_null($this->content) && !is_null($this->template)) {
+				foreach ($this->templateArgsMinimum as $v) {
+					if (!isset($this->templateArgs[$v])) {
+						throw new EmailException('Missing templateArgs.' . $v, EmailException::MISS_PARAMETER);
+					}
 				}
+
+				$latte = $this->latteFactory->create();
+
+				$args['_control'] = $this->linkGenerator;
+				$args['_presenter'] = $this->linkGenerator;
+				Nette\Bridges\ApplicationLatte\UIMacros::install($latte->getCompiler());
+
+				$args['content'] = $latte->renderToString($this->template, $args + $this->templateArgs);
 			}
-
-			$latte = $this->latteFactory->create();
-
-			$args['_control'] = $this->linkGenerator;
-			$args['_presenter'] = $this->linkGenerator;
-			Nette\Bridges\ApplicationLatte\UIMacros::install($latte->getCompiler());
-
-			$args['content'] = $latte->renderToString($this->template, $args + $this->templateArgs);
+		}
+		catch (EmailException $e) {
+			if ($validate || $e->getCode() != EmailException::MISS_PARAMETER) {
+				throw $e;
+			}
 		}
 
-		if (in_array(NULL, $args)) {
-			foreach ($args as $k => $v) {
-				if (is_null($v)) {
-					throw new EmailException('Missing ' . $k, EmailException::MISS_PARAMETER);
+		try {
+			if (in_array(NULL, $args)) {
+				foreach ($args as $k => $v) {
+					if (is_null($v)) {
+						throw new EmailException('Missing ' . $k, EmailException::MISS_PARAMETER);
+					}
 				}
+			}
+		}
+		catch (EmailException $e) {
+			if ($validate || $e->getCode() != EmailException::MISS_PARAMETER) {
+				throw $e;
 			}
 		}
 
