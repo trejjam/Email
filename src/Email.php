@@ -40,9 +40,12 @@ class Email
 
 	protected $unsubscribeEmail = NULL;
 	protected $unsubscribeLink  = NULL;
+	/**
+	 * @var array
+	 */
+	protected $attachments = [];
 
-	function __construct($from, $fromName = NULL, Nette\Bridges\ApplicationLatte\ILatteFactory $latteFactory, Nette\Application\LinkGenerator $linkGenerator)
-	{
+	function __construct($from, $fromName = NULL, Nette\Bridges\ApplicationLatte\ILatteFactory $latteFactory, Nette\Application\LinkGenerator $linkGenerator) {
 		$this->from($from, $fromName);
 		$this->latteFactory = $latteFactory;
 		$this->linkGenerator = $linkGenerator;
@@ -53,8 +56,7 @@ class Email
 	 * @return $this
 	 * @throws EmailException
 	 */
-	public function unsubscribeEmail($unsubscribeEmail)
-	{
+	public function unsubscribeEmail($unsubscribeEmail) {
 		if (!Nette\Utils\Validators::isEmail($unsubscribeEmail)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
@@ -68,8 +70,7 @@ class Email
 	 * @return $this
 	 * @throws EmailException
 	 */
-	public function unsubscribeLink($unsubscribeLink)
-	{
+	public function unsubscribeLink($unsubscribeLink) {
 		if (!Nette\Utils\Validators::isUrl($unsubscribeLink)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
@@ -84,8 +85,7 @@ class Email
 	 * @return $this
 	 * @throw EmailException
 	 */
-	function from($from, $name = NULL)
-	{
+	function from($from, $name = NULL) {
 		if (!Nette\Utils\Validators::isEmail($from)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
@@ -101,8 +101,7 @@ class Email
 	 * @return $this
 	 * @throw EmailException
 	 */
-	function to($to, $name = NULL)
-	{
+	function to($to, $name = NULL) {
 		if (!Nette\Utils\Validators::isEmail($to)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
@@ -118,8 +117,7 @@ class Email
 	 * @return $this
 	 * @throw EmailException
 	 */
-	function replyTo($to, $name = NULL)
-	{
+	function replyTo($to, $name = NULL) {
 		if (!Nette\Utils\Validators::isEmail($to)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
@@ -133,8 +131,7 @@ class Email
 	 * @param string $subject
 	 * @return $this
 	 */
-	function subject($subject)
-	{
+	function subject($subject) {
 		$this->subject = $subject;
 
 		return $this;
@@ -143,8 +140,7 @@ class Email
 	 * @param string $content
 	 * @return $this
 	 */
-	function content($content)
-	{
+	function content($content) {
 		$this->content = $content;
 
 		return $this;
@@ -153,8 +149,7 @@ class Email
 	 * @param string $template
 	 * @return $this
 	 */
-	function template($template)
-	{
+	function template($template) {
 		$this->template = $template;
 
 		return $this;
@@ -163,8 +158,7 @@ class Email
 	 * @param array $args
 	 * @return $this
 	 */
-	function templateArgs(array $args)
-	{
+	function templateArgs(array $args) {
 		$this->templateArgs = $args;
 
 		return $this;
@@ -175,15 +169,17 @@ class Email
 	 *
 	 * @internal
 	 */
-	function templateArgsMinimum($args)
-	{
+	function templateArgsMinimum($args) {
 		$this->templateArgsMinimum = $args;
 
 		return $this;
 	}
 
-	function get($validate = TRUE)
-	{
+	public function addAttachment($file, $content = NULL, $contentType = NULL) {
+		$this->attachments[] = [$file, $content, $contentType];
+	}
+
+	function get($validate = TRUE) {
 		$required = [
 			'from',
 			'to',
@@ -199,6 +195,7 @@ class Email
 			'replyToName' => is_null($this->replyTo) ? $this->fromName : $this->replyToName,
 			'subject'     => $this->subject,
 			'content'     => $this->content,
+			'attachments' => $this->attachments,
 		];
 		if (!is_null($this->unsubscribeEmail)) {
 			$args['unsubscribeEmail'] = $this->unsubscribeEmail;

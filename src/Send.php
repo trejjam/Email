@@ -40,8 +40,7 @@ class Send
 	 */
 	protected $locale = NULL;
 
-	function __construct($templateDirectory, $configurations, $useTranslator, IEmailFactory $email, Nette\Mail\IMailer $mailer)
-	{
+	function __construct($templateDirectory, $configurations, $useTranslator, IEmailFactory $email, Nette\Mail\IMailer $mailer) {
 		$this->templateDirectory = $templateDirectory;
 		$this->configurations = $configurations;
 		$this->emailFactory = $email;
@@ -49,18 +48,15 @@ class Send
 		$this->useTranslator = $useTranslator;
 	}
 
-	protected function setLocale($locale)
-	{
+	protected function setLocale($locale) {
 		$this->locale = $locale;
 	}
 
-	protected function getLocale($locale = NULL)
-	{
+	protected function getLocale($locale = NULL) {
 		return (!is_null($locale) ? $locale : $this->locale);
 	}
 
-	protected function getLocaleDir($configuration, $locale)
-	{
+	protected function getLocaleDir($configuration, $locale) {
 		if (
 			$this->useTranslator
 			&& $configuration['useTranslator']
@@ -78,8 +74,7 @@ class Send
 	 * @param $emailFrom
 	 * @return Email
 	 */
-	function getTemplate($name, $emailFrom, $emailFromName = FALSE, $locale = NULL)
-	{
+	function getTemplate($name, $emailFrom, $emailFromName = FALSE, $locale = NULL) {
 		if (isset($this->configurations[$name])) {
 			$configuration = $this->configurations[$name];
 			$templateFile = is_null($configuration['template']) ? $name : $configuration['template'];
@@ -112,8 +107,7 @@ class Send
 		}
 	}
 
-	function send(Email $email)
-	{
+	function send(Email $email) {
 		$data = $email->get();
 
 		$mail = new Nette\Mail\Message;
@@ -122,6 +116,10 @@ class Send
 			->addReplyTo($data->replyTo, $data->replyToName)
 			->addTo($data->to, $data->toName)
 			->setHtmlBody($data->content);
+
+		foreach ($data->attachments as $v) {
+			call_user_func_array([$mail, 'addAttachment'], $v);
+		}
 
 		if (isset($data->unsubscribeEmail) || isset($data->unsubscribeLink)) {
 			$mail->setHeader('List-Unsubscribe', (isset($data->unsubscribeEmail) ? '<mailto:' . $data->unsubscribeEmail . '>' : '') . (isset($data->unsubscribeEmail) && isset($data->unsubscribeLink) ? ", " : "") . (isset($data->unsubscribeLink) ? '<' . $data->unsubscribeLink . '>' : ''), TRUE);

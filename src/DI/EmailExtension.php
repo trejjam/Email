@@ -38,8 +38,7 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 	 * @return array
 	 * @throws Nette\Utils\AssertionException
 	 */
-	protected function createConfig()
-	{
+	protected function createConfig() {
 		$originalConfig = $this->config;
 
 		if (count($originalConfig['templates'])) {
@@ -56,8 +55,7 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 		return $config;
 	}
 
-	public function beforeCompile()
-	{
+	public function beforeCompile() {
 		parent::beforeCompile();
 
 		$config = $this->createConfig();

@@ -16,6 +16,9 @@ use Nette,
 interface IEmailFactory
 {
 	/**
+	 * @param string      $from
+	 * @param string|null $fromName
+	 * @param string|null $locale
 	 * @return Email
 	 */
 	function create($from, $fromName = NULL, $locale = NULL);
