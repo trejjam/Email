@@ -129,14 +129,18 @@ class Email
 
 		return $this;
 	}
-
+	/**
+	 * @param string $subject
+	 * @return $this
+	 * @internal
+	 */
 	function defaultSubject($subject) {
 		$this->subjectDefault = $subject;
 
 		return $this;
 	}
 	/**
-	 * @param string $subject
+	 * @param string|string[] $subject
 	 * @return $this
 	 */
 	function subject($subject) {
@@ -145,8 +149,9 @@ class Email
 		return $this;
 	}
 	/**
-	 * @param array $args
+	 * @param string[] $args
 	 * @return $this
+	 * @internal
 	 */
 	function subjectArgs(array $args = NULL) {
 		$this->subjectArgs = $args;
