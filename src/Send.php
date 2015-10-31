@@ -93,13 +93,14 @@ class Send
 					. $templateFile
 					. '.latte'
 				)
-				->subject(
+				->defaultSubject(
 					$this->useTranslator
 					&& $configuration['useTranslator']
 					&& !is_null($this->getLocale($locale))
 						? $configuration['locale'][$this->getLocale($locale)]['subject']
 						: $configuration['subject']
 				)
+				->subjectArgs($configuration['subjectFields'])
 				->templateArgsMinimum($configuration['requiredFields']);
 		}
 		else {

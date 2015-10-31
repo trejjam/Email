@@ -21,6 +21,7 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 
 	protected $templates = [
 		'subject'        => NULL,
+		'subjectFields'  => NULL,
 		'template'       => NULL,
 		'requiredFields' => [],
 		'useTranslator'  => TRUE,

@@ -30,8 +30,9 @@ class Email
 	protected $toName         = NULL;
 	protected $replyTo        = NULL;
 	protected $replyToName    = NULL;
-	protected $defaultSubject = NULL;
-	protected $subject        = "";
+	protected $subject        = NULL;
+	protected $subjectDefault = '';
+	protected $subjectArgs    = NULL;
 
 	protected $content = NULL;
 
@@ -128,23 +129,56 @@ class Email
 
 		return $this;
 	}
+
+	function defaultSubject($subject) {
+		$this->subjectDefault = $subject;
+
+		return $this;
+	}
 	/**
 	 * @param string $subject
 	 * @return $this
 	 */
 	function subject($subject) {
-		if (!is_null($this->defaultSubject) && is_array($subject)) {
-			$this->subject = call_user_func_array('sprintf', array_merge([$this->defaultSubject], $subject));
-		}
-		else {
-			$this->subject = $subject;
-
-			if (is_null($this->defaultSubject)) {
-				$this->defaultSubject = $subject;
-			}
-		}
+		$this->subject = $subject;
 
 		return $this;
+	}
+	/**
+	 * @param array $args
+	 * @return $this
+	 */
+	function subjectArgs(array $args = NULL) {
+		$this->subjectArgs = $args;
+
+		return $this;
+	}
+	/**
+	 * @return string
+	 */
+	protected function getSubject() {
+		if (is_array($this->subjectArgs) && !is_array($this->subject)) {
+			$thisValues = ((array)$this->get(FALSE, FALSE)) + $this->templateArgs;
+
+			$subjectFields = [$this->subjectDefault];
+			foreach ($this->subjectArgs as $v) {
+				if (!isset($thisValues[$v])) {
+					throw new EmailException('Missing ' . $v, EmailException::MISS_PARAMETER);
+				}
+				$subjectFields[] = $thisValues[$v];
+			}
+
+			return call_user_func_array('sprintf', $subjectFields);
+		}
+		else if (is_null($this->subject)) {
+			return $this->subjectDefault;
+		}
+		else if (is_array($this->subject)) {
+			return call_user_func_array('sprintf', array_merge([$this->subjectDefault], $this->subject));
+		}
+		else {
+			return $this->subject;
+		}
 	}
 	/**
 	 * @param string $content
@@ -189,7 +223,7 @@ class Email
 		$this->attachments[] = [$file, $content, $contentType];
 	}
 
-	function get($validate = TRUE) {
+	function get($validate = TRUE, $parseSubject = TRUE) {
 		$required = [
 			'from',
 			'to',
@@ -203,7 +237,7 @@ class Email
 			'toName'      => $this->toName,
 			'replyTo'     => is_null($this->replyTo) ? $this->from : $this->replyTo,
 			'replyToName' => is_null($this->replyTo) ? $this->fromName : $this->replyToName,
-			'subject'     => $this->subject,
+			'subject'     => $parseSubject ? $this->getSubject() : $this->subjectDefault,
 			'content'     => $this->content,
 			'attachments' => $this->attachments,
 		];
