@@ -25,12 +25,13 @@ class Email
 	protected $linkGenerator;
 
 	protected $from;
-	protected $fromName    = NULL;
-	protected $to          = NULL;
-	protected $toName      = NULL;
-	protected $replyTo     = NULL;
-	protected $replyToName = NULL;
-	protected $subject     = "";
+	protected $fromName       = NULL;
+	protected $to             = NULL;
+	protected $toName         = NULL;
+	protected $replyTo        = NULL;
+	protected $replyToName    = NULL;
+	protected $defaultSubject = NULL;
+	protected $subject        = "";
 
 	protected $content = NULL;
 
@@ -132,7 +133,16 @@ class Email
 	 * @return $this
 	 */
 	function subject($subject) {
-		$this->subject = $subject;
+		if (!is_null($this->defaultSubject) && is_array($subject)) {
+			$this->subject = call_user_func_array('sprintf', array_merge([$this->defaultSubject], $subject));
+		}
+		else {
+			$this->subject = $subject;
+
+			if (is_null($this->defaultSubject)) {
+				$this->defaultSubject = $subject;
+			}
+		}
 
 		return $this;
 	}
