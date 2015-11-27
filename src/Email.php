@@ -52,9 +52,9 @@ class Email
 	protected $attachments = [];
 
 	/**
-	 * @var callable
+	 * @var callable[]
 	 */
-	protected $latteSetupFilterCallback=[];
+	protected $latteSetupFilterCallback = [];
 
 	function __construct($from, $fromName = NULL, Nette\Bridges\ApplicationLatte\ILatteFactory $latteFactory, Nette\Application\LinkGenerator $linkGenerator, Nette\Http\Request $httpRequest) {
 		$this->from($from, $fromName);
