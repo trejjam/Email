@@ -23,6 +23,10 @@ class Email
 	 * @var Nette\Application\LinkGenerator
 	 */
 	protected $linkGenerator;
+	/**
+	 * @var Nette\Http\UrlScript
+	 */
+	protected $refUrl;
 
 	protected $from;
 	protected $fromName       = NULL;
@@ -47,10 +51,16 @@ class Email
 	 */
 	protected $attachments = [];
 
-	function __construct($from, $fromName = NULL, Nette\Bridges\ApplicationLatte\ILatteFactory $latteFactory, Nette\Application\LinkGenerator $linkGenerator) {
+	/**
+	 * @var callable
+	 */
+	protected $latteSetupFilterCallback=[];
+
+	function __construct($from, $fromName = NULL, Nette\Bridges\ApplicationLatte\ILatteFactory $latteFactory, Nette\Application\LinkGenerator $linkGenerator, Nette\Http\Request $httpRequest) {
 		$this->from($from, $fromName);
 		$this->latteFactory = $latteFactory;
 		$this->linkGenerator = $linkGenerator;
+		$this->refUrl = $httpRequest->getUrl();
 	}
 
 	/**
@@ -224,6 +234,11 @@ class Email
 		return $this;
 	}
 
+	public function addLatteSetupFilterCallback(callable $callback)
+	{
+		$this->latteSetupFilterCallback[] = $callback;
+	}
+
 	public function addAttachment($file, $content = NULL, $contentType = NULL) {
 		$this->attachments[] = [$file, $content, $contentType];
 	}
@@ -265,7 +280,12 @@ class Email
 
 				$args['_control'] = $this->linkGenerator;
 				$args['_presenter'] = $this->linkGenerator;
+				$args['_url'] = $this->refUrl;
 				Nette\Bridges\ApplicationLatte\UIMacros::install($latte->getCompiler());
+
+				foreach ($this->latteSetupFilterCallback as $v) {
+					$v($latte);
+				}
 
 				$args['content'] = $latte->renderToString($this->template, $args + $this->templateArgs);
 			}
