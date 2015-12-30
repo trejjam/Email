@@ -27,6 +27,10 @@ class Send
 	 */
 	protected $useTranslator;
 	/**
+	 * @var string
+	 */
+	protected $subjectPrefix;
+	/**
 	 * @var IEmailFactory
 	 */
 	protected $emailFactory;
@@ -40,12 +44,13 @@ class Send
 	 */
 	protected $locale = NULL;
 
-	function __construct($templateDirectory, $configurations, $useTranslator, IEmailFactory $email, Nette\Mail\IMailer $mailer) {
+	function __construct($templateDirectory, $configurations, $useTranslator, $subjectPrefix, IEmailFactory $email, Nette\Mail\IMailer $mailer) {
 		$this->templateDirectory = $templateDirectory;
 		$this->configurations = $configurations;
 		$this->emailFactory = $email;
 		$this->mailer = $mailer;
 		$this->useTranslator = $useTranslator;
+		$this->subjectPrefix = $subjectPrefix;
 	}
 
 	protected function setLocale($locale) {
@@ -125,7 +130,7 @@ class Send
 		if (isset($data->unsubscribeEmail) || isset($data->unsubscribeLink)) {
 			$mail->setHeader('List-Unsubscribe', (isset($data->unsubscribeEmail) ? '<mailto:' . $data->unsubscribeEmail . '>' : '') . (isset($data->unsubscribeEmail) && isset($data->unsubscribeLink) ? ", " : "") . (isset($data->unsubscribeLink) ? '<' . $data->unsubscribeLink . '>' : ''), TRUE);
 		}
-		$mail->setSubject($data->subject);
+		$mail->setSubject($this->subjectPrefix . $data->subject);
 
 		$this->mailer->send($mail);
 	}

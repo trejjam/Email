@@ -17,6 +17,7 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 		'templateDirectory' => '%appDir%/presenters/templates/emails',
 		'templates'         => [],
 		'useTranslator'     => FALSE,
+		'subjectPrefix'     => '',
 	];
 
 	protected $templates = [
@@ -67,6 +68,7 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 			$config['templateDirectory'],
 			$config['templates'],
 			$config['useTranslator'],
+			$config['subjectPrefix'],
 		]);
 	}
 }
