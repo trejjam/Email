@@ -178,7 +178,8 @@ class Email
 			$subjectFields = [$this->subjectDefault];
 			foreach ($this->subjectArgs as $v) {
 				if (!isset($thisValues[$v])) {
-					throw new EmailException('Missing ' . $v, EmailException::MISS_PARAMETER);
+					trigger_error('Missing ' . $v);
+					$thisValues[$v] = '';
 				}
 				$subjectFields[] = $thisValues[$v];
 			}
@@ -268,14 +269,18 @@ class Email
 			$args['unsubscribeLink'] = $this->unsubscribeLink;
 		}
 
-		try {
-			if (is_null($this->content) && !is_null($this->template)) {
-				foreach ($this->templateArgsMinimum as $v) {
-					if (!isset($this->templateArgs[$v])) {
-						throw new EmailException('Missing templateArgs.' . $v, EmailException::MISS_PARAMETER);
+
+		if (is_null($this->content) && !is_null($this->template)) {
+			foreach ($this->templateArgsMinimum as $v) {
+				if (!isset($this->templateArgs[$v])) {
+					if ($validate) {
+						trigger_error('Missing templateArgs.' . $v);
+						$this->templateArgs[$v] = '';
 					}
 				}
+			}
 
+			if ($validate) {
 				$latte = $this->latteFactory->create();
 
 				$args['_control'] = $this->linkGenerator;
@@ -290,18 +295,12 @@ class Email
 				$args['content'] = $latte->renderToString($this->template, $args + $this->templateArgs);
 			}
 		}
-		catch (EmailException $e) {
-			if ($validate || $e->getCode() != EmailException::MISS_PARAMETER) {
-				throw $e;
-			}
-		}
 
-		if ($validate) {
-			if (in_array(NULL, $args)) {
-				foreach ($required as $v) {
-					if (is_null($args[$v])) {
-						throw new EmailException('Missing ' . $v, EmailException::MISS_PARAMETER);
-					}
+		foreach ($required as $v) {
+			if (is_null($args[$v])) {
+				if ($validate) {
+					trigger_error('Missing ' . $v);
+					$args[$v] = '';
 				}
 			}
 		}
