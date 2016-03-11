@@ -75,8 +75,11 @@ class Send
 	}
 
 	/**
-	 * @param $name
-	 * @param $emailFrom
+	 * @param      $name
+	 * @param      $emailFrom
+	 * @param bool $emailFromName
+	 * @param null $locale
+	 *
 	 * @return Email
 	 */
 	function getTemplate($name, $emailFrom, $emailFromName = FALSE, $locale = NULL) {
@@ -87,10 +90,7 @@ class Send
 			return $this->emailFactory
 				->create(
 					$emailFrom,
-					$emailFromName,
-					$this->useTranslator && $configuration['useTranslator']
-						? $this->getLocale($locale)
-						: NULL
+					$emailFromName
 				)
 				->template(
 					$this->templateDirectory . '/'
