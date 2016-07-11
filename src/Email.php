@@ -283,8 +283,8 @@ class Email
 			if ($validate) {
 				$latte = $this->latteFactory->create();
 
-				$args['_control'] = $this->linkGenerator;
-				$args['_presenter'] = $this->linkGenerator;
+				$latte->addProvider('uiControl', $this->linkGenerator);
+				$latte->addProvider('uiPresenter', $this->linkGenerator);
 				$args['_url'] = $this->refUrl;
 				Nette\Bridges\ApplicationLatte\UIMacros::install($latte->getCompiler());
 
