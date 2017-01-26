@@ -7,9 +7,7 @@
 		"template",
 		"latte"
 	],
-	"license": [
-		"MIT"
-	],
+	"license": "MIT",
 	"authors": [
 		{
 			"name": "Jan Trejbal"
