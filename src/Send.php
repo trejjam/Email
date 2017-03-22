@@ -44,7 +44,8 @@ class Send
 	 */
 	protected $locale = NULL;
 
-	function __construct($templateDirectory, $configurations, $useTranslator, $subjectPrefix, IEmailFactory $email, Nette\Mail\IMailer $mailer) {
+	function __construct($templateDirectory, $configurations, $useTranslator, $subjectPrefix, IEmailFactory $email, Nette\Mail\IMailer $mailer)
+	{
 		$this->templateDirectory = $templateDirectory;
 		$this->configurations = $configurations;
 		$this->emailFactory = $email;
@@ -53,15 +54,18 @@ class Send
 		$this->subjectPrefix = $subjectPrefix;
 	}
 
-	protected function setLocale($locale) {
+	protected function setLocale($locale)
+	{
 		$this->locale = $locale;
 	}
 
-	protected function getLocale($locale = NULL) {
+	protected function getLocale($locale = NULL)
+	{
 		return (!is_null($locale) ? $locale : $this->locale);
 	}
 
-	protected function getLocaleDir($configuration, $locale) {
+	protected function getLocaleDir($configuration, $locale)
+	{
 		if (
 			$this->useTranslator
 			&& $configuration['useTranslator']
@@ -81,23 +85,20 @@ class Send
 	 * @param null $locale
 	 *
 	 * @return Email
+	 * @throws EmailException
 	 */
-	function getTemplate($name, $emailFrom, $emailFromName = FALSE, $locale = NULL) {
+	public function getTemplate($name, $emailFrom, $emailFromName = FALSE, $locale = NULL)
+	{
 		if (isset($this->configurations[$name])) {
 			$configuration = $this->configurations[$name];
-			$templateFile = is_null($configuration['template']) ? $name : $configuration['template'];
+
 
 			return $this->emailFactory
 				->create(
 					$emailFrom,
 					$emailFromName
 				)
-				->template(
-					$this->templateDirectory . '/'
-					. $this->getLocaleDir($configuration, $locale)
-					. $templateFile
-					. '.latte'
-				)
+				->template($this->getTemplateFile($name, $locale))
 				->defaultSubject(
 					$this->useTranslator
 					&& $configuration['useTranslator']
@@ -113,7 +114,28 @@ class Send
 		}
 	}
 
-	function send(Email $email) {
+	/**
+	 * @param string      $templateName
+	 * @param string|null $locale
+	 *
+	 * @return string
+	 */
+	protected function getTemplateFile($templateName, $locale = NULL)
+	{
+		$configuration = $this->configurations[$templateName];
+
+		$templateFile = is_null($configuration['template']) ? $templateName : $configuration['template'];
+
+		return $this->templateDirectory . '/'
+			. $this->getLocaleDir($configuration, $locale)
+			. $templateFile
+			. '.latte';
+	}
+
+	public function send(Email $email, Nette\Mail\IMailer $mailer = NULL)
+	{
+		$mailer = $mailer ?: $this->mailer;
+
 		$data = $email->get();
 
 		$mail = new Nette\Mail\Message;
@@ -132,6 +154,6 @@ class Send
 		}
 		$mail->setSubject($this->subjectPrefix . $data->subject);
 
-		$this->mailer->send($mail);
+		$mailer->send($mail);
 	}
 }
