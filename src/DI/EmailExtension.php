@@ -1,15 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Jan
- * Date: 26. 10. 2014
- * Time: 17:38
- */
 
 namespace Trejjam\Email\DI;
 
-use Nette,
-	Trejjam;
+use Nette;
+use Trejjam;
 
 class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 {
@@ -40,7 +34,8 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 	 * @return array
 	 * @throws Nette\Utils\AssertionException
 	 */
-	protected function createConfig() {
+	protected function createConfig()
+	{
 		$originalConfig = $this->config;
 
 		if (count($originalConfig['templates'])) {
@@ -57,18 +52,30 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 		return $config;
 	}
 
-	public function beforeCompile() {
+	public function beforeCompile()
+	{
 		parent::beforeCompile();
 
 		$config = $this->createConfig();
 
 		$classes = $this->getClasses();
 
-		$classes['send']->setArguments([
-			$config['templateDirectory'],
-			$config['templates'],
-			$config['useTranslator'],
-			$config['subjectPrefix'],
-		]);
+		$this->registerEmailFactory($classes['send'], $config);
+	}
+
+	/**
+	 * @param Nette\DI\ServiceDefinition $factory
+	 * @param array                      $config
+	 */
+	public function registerEmailFactory(Nette\DI\ServiceDefinition $factory, $config)
+	{
+		$factory->setArguments(
+			[
+				$config['templateDirectory'],
+				$config['templates'],
+				$config['useTranslator'],
+				$config['subjectPrefix'],
+			]
+		);
 	}
 }

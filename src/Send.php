@@ -1,16 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jam
- * Date: 14.2.15
- * Time: 21:53
- */
 
 namespace Trejjam\Email;
 
-
-use Nette,
-	Trejjam;
+use Nette;
+use Trejjam;
 
 class Send
 {
@@ -38,7 +31,6 @@ class Send
 	 * @var Nette\Mail\IMailer
 	 */
 	protected $mailer;
-
 	/**
 	 * @var string
 	 */
@@ -79,26 +71,28 @@ class Send
 	}
 
 	/**
-	 * @param      $name
-	 * @param      $emailFrom
-	 * @param bool $emailFromName
-	 * @param null $locale
+	 * @param            $name
+	 * @param            $emailFrom
+	 * @param bool       $emailFromName
+	 * @param null       $locale
+	 * @param mixed|null $customAttribute
 	 *
 	 * @return Email
 	 * @throws EmailException
 	 */
-	public function getTemplate($name, $emailFrom, $emailFromName = FALSE, $locale = NULL)
+	public function getTemplate($name, $emailFrom, $emailFromName = FALSE, $locale = NULL, $customAttribute = NULL)
 	{
 		if (isset($this->configurations[$name])) {
 			$configuration = $this->configurations[$name];
 
+			$template = $this->getTemplateFile($name, $locale, $customAttribute);
 
 			return $this->emailFactory
 				->create(
 					$emailFrom,
 					$emailFromName
 				)
-				->template($this->getTemplateFile($name, $locale))
+				->template($template)
 				->defaultSubject(
 					$this->useTranslator
 					&& $configuration['useTranslator']
@@ -120,7 +114,7 @@ class Send
 	 *
 	 * @return string
 	 */
-	protected function getTemplateFile($templateName, $locale = NULL)
+	protected function getTemplateFile($templateName, $locale = NULL, $customAttribute = NULL)
 	{
 		$configuration = $this->configurations[$templateName];
 
