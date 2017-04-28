@@ -137,7 +137,6 @@ class Send
 		$mailer = $mailer ?: $this->mailer;
 
 		$data = $email->get();
-
 		$mail = new Nette\Mail\Message;
 		$mail
 			->setFrom($data->from, $data->fromName)
@@ -153,7 +152,6 @@ class Send
 			$mail->setHeader('List-Unsubscribe', (isset($data->unsubscribeEmail) ? '<mailto:' . $data->unsubscribeEmail . '>' : '') . (isset($data->unsubscribeEmail) && isset($data->unsubscribeLink) ? ", " : "") . (isset($data->unsubscribeLink) ? '<' . $data->unsubscribeLink . '>' : ''), TRUE);
 		}
 		$mail->setSubject($this->subjectPrefix . $data->subject);
-
 		$mailer->send($mail);
 	}
 }
