@@ -23,11 +23,11 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 	];
 
 	protected $classesDefinition = [
-		'send' => 'Trejjam\Email\Send',
+		'send' => Trejjam\Email\Send::class,
 	];
 
 	protected $factoriesDefinition = [
-		'emailFactory' => 'Trejjam\Email\IEmailFactory',
+		'emailFactory' => Trejjam\Email\IEmailFactory::class,
 	];
 
 	/**

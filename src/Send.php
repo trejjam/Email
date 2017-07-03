@@ -36,8 +36,14 @@ class Send
 	 */
 	protected $locale = NULL;
 
-	function __construct($templateDirectory, $configurations, $useTranslator, $subjectPrefix, IEmailFactory $email, Nette\Mail\IMailer $mailer)
-	{
+	function __construct(
+		$templateDirectory,
+		$configurations,
+		$useTranslator,
+		$subjectPrefix,
+		IEmailFactory $email,
+		Nette\Mail\IMailer $mailer
+	) {
 		$this->templateDirectory = $templateDirectory;
 		$this->configurations = $configurations;
 		$this->emailFactory = $email;
