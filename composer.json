@@ -20,7 +20,7 @@
 		"nette/utils": "~2.3",
 		"nette/mail": "~2.3",
 		"latte/latte": "~2.3",
-		"trejjam/base-extension": "~0.5.0"
+		"trejjam/base-extension": "~0.5"
 	},
 	"require-dev": {
 		"nette/tester": "@dev"
