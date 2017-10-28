@@ -9,7 +9,7 @@ use Trejjam;
 class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 {
 	protected $default = [
-		'templateDirectory' => '%appDir%/presenters/templates/emails',
+		'templateDirectory' => 'presenters/templates/emails',
 		'templates'         => [],
 		'useTranslator'     => FALSE,
 		'subjectPrefix'     => '',
@@ -31,8 +31,10 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 		'emailFactory' => Trejjam\Email\IEmailFactory::class,
 	];
 
-	public function loadConfiguration() : void
+	public function loadConfiguration(bool $validateConfig = TRUE) : void
 	{
+		$this->default['templateDirectory'] = $this->getContainerBuilder()->parameters['appDir'] . DIRECTORY_SEPARATOR . $this->default['templateDirectory'];
+
 		$config = $this->config;
 
 		if (
@@ -51,9 +53,9 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 	{
 		parent::beforeCompile();
 
-		$classes = $this->getClasses();
+		$types = $this->getTypes();
 
-		$this->registerEmailFactory($classes['send'], $this->config);
+		$this->registerEmailFactory($types['send'], $this->config);
 	}
 
 	public function registerEmailFactory(Nette\DI\ServiceDefinition $factory, array $config)
