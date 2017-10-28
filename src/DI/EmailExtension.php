@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Trejjam\Email\DI;
 
@@ -30,44 +31,32 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 		'emailFactory' => Trejjam\Email\IEmailFactory::class,
 	];
 
-	/**
-	 * @return array
-	 * @throws Nette\Utils\AssertionException
-	 */
-	protected function createConfig()
+	public function loadConfiguration() : void
 	{
-		$originalConfig = $this->config;
+		$config = $this->config;
 
-		if (count($originalConfig['templates'])) {
-
-			foreach ($originalConfig['templates'] as $k => $v) {
+		if (
+			array_key_exists('templates', $config)
+			&& is_array($config['templates'])
+		) {
+			foreach ($config['templates'] as $k => $v) {
 				$this->default['templates'][$k] = $this->templates;
 			}
 		}
 
-		$config = parent::createConfig();
-
-		Nette\Utils\Validators::assert($config, 'array');
-
-		return $config;
+		parent::loadConfiguration();
 	}
 
-	public function beforeCompile()
+	public function beforeCompile() : void
 	{
 		parent::beforeCompile();
 
-		$config = $this->createConfig();
-
 		$classes = $this->getClasses();
 
-		$this->registerEmailFactory($classes['send'], $config);
+		$this->registerEmailFactory($classes['send'], $this->config);
 	}
 
-	/**
-	 * @param Nette\DI\ServiceDefinition $factory
-	 * @param array                      $config
-	 */
-	public function registerEmailFactory(Nette\DI\ServiceDefinition $factory, $config)
+	public function registerEmailFactory(Nette\DI\ServiceDefinition $factory, array $config)
 	{
 		$factory->setArguments(
 			[

@@ -1,17 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jam
- * Date: 14.2.15
- * Time: 21:54
- */
+declare(strict_types=1);
 
 namespace Trejjam\Email;
 
-
-use Nette,
-	Latte,
-	Trejjam;
+use Nette;
+use Trejjam;
 
 class Email
 {
@@ -29,23 +22,23 @@ class Email
 	protected $refUrl;
 
 	protected $from;
-	protected $fromName       = NULL;
-	protected $to             = NULL;
-	protected $toName         = NULL;
-	protected $replyTo        = NULL;
-	protected $replyToName    = NULL;
-	protected $subject        = NULL;
+	protected $fromName;
+	protected $to;
+	protected $toName;
+	protected $replyTo;
+	protected $replyToName;
+	protected $subject;
 	protected $subjectDefault = '';
-	protected $subjectArgs    = NULL;
+	protected $subjectArgs;
 
-	protected $content = NULL;
+	protected $content;
 
-	protected $template            = NULL;
+	protected $template;
 	protected $templateArgs        = [];
 	protected $templateArgsMinimum = [];
 
-	protected $unsubscribeEmail = NULL;
-	protected $unsubscribeLink  = NULL;
+	protected $unsubscribeEmail;
+	protected $unsubscribeLink;
 	/**
 	 * @var array
 	 */
@@ -56,7 +49,13 @@ class Email
 	 */
 	protected $latteSetupFilterCallback = [];
 
-	function __construct($from, $fromName = NULL, Nette\Bridges\ApplicationLatte\ILatteFactory $latteFactory, Nette\Application\LinkGenerator $linkGenerator, Nette\Http\Request $httpRequest) {
+	public function __construct(
+		string $from,
+		string $fromName = NULL,
+		Nette\Bridges\ApplicationLatte\ILatteFactory $latteFactory,
+		Nette\Application\LinkGenerator $linkGenerator,
+		Nette\Http\Request $httpRequest
+	) {
 		$this->from($from, $fromName);
 		$this->latteFactory = $latteFactory;
 		$this->linkGenerator = $linkGenerator;
@@ -65,11 +64,13 @@ class Email
 
 	/**
 	 * @param string $unsubscribeEmail
+	 *
 	 * @return $this
 	 * @throws EmailException
 	 */
-	public function unsubscribeEmail($unsubscribeEmail) {
-		if (!Nette\Utils\Validators::isEmail($unsubscribeEmail)) {
+	public function unsubscribeEmail($unsubscribeEmail) : self
+	{
+		if ( !Nette\Utils\Validators::isEmail($unsubscribeEmail)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
 
@@ -77,13 +78,10 @@ class Email
 
 		return $this;
 	}
-	/**
-	 * @param string $unsubscribeLink
-	 * @return $this
-	 * @throws EmailException
-	 */
-	public function unsubscribeLink($unsubscribeLink) {
-		if (!Nette\Utils\Validators::isUrl($unsubscribeLink)) {
+
+	public function unsubscribeLink(string $unsubscribeLink) : self
+	{
+		if ( !Nette\Utils\Validators::isUrl($unsubscribeLink)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
 
@@ -91,46 +89,34 @@ class Email
 
 		return $this;
 	}
-	/**
-	 * @param string             $from
-	 * @param bool(false)|string $name
-	 * @return $this
-	 * @throw EmailException
-	 */
-	function from($from, $name = NULL) {
-		if (!Nette\Utils\Validators::isEmail($from)) {
+
+	public function from(string $from, string $name = NULL) : self
+	{
+		if ( !Nette\Utils\Validators::isEmail($from)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
 
 		$this->from = $from;
-		$this->name = $name;
+		$this->fromName = $name;
 
 		return $this;
 	}
-	/**
-	 * @param string             $to
-	 * @param bool(false)|string $name
-	 * @return $this
-	 * @throw EmailException
-	 */
-	function to($to, $name = NULL) {
-		if (!Nette\Utils\Validators::isEmail($to)) {
+
+	public function to(string $to, string $name = NULL) : self
+	{
+		if ( !Nette\Utils\Validators::isEmail($to)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
 
 		$this->to = $to;
-		$this->name = $name;
+		$this->toName = $name;
 
 		return $this;
 	}
-	/**
-	 * @param string             $to
-	 * @param bool(false)|string $name
-	 * @return $this
-	 * @throw EmailException
-	 */
-	function replyTo($to, $name = NULL) {
-		if (!Nette\Utils\Validators::isEmail($to)) {
+
+	public function replyTo(string $to, string $name = NULL) : self
+	{
+		if ( !Nette\Utils\Validators::isEmail($to)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
 
@@ -139,45 +125,53 @@ class Email
 
 		return $this;
 	}
+
 	/**
 	 * @param string $subject
+	 *
 	 * @return $this
 	 * @internal
 	 */
-	function defaultSubject($subject) {
+	public function defaultSubject(string $subject) : self
+	{
 		$this->subjectDefault = $subject;
 
 		return $this;
 	}
+
 	/**
 	 * @param string|string[] $subject
+	 *
 	 * @return $this
 	 */
-	function subject($subject) {
+	public function subject($subject) : self
+	{
 		$this->subject = $subject;
 
 		return $this;
 	}
+
 	/**
 	 * @param string[] $args
+	 *
 	 * @return $this
 	 * @internal
 	 */
-	function subjectArgs(array $args = NULL) {
+	public function subjectArgs(array $args = NULL) : self
+	{
 		$this->subjectArgs = $args;
 
 		return $this;
 	}
-	/**
-	 * @return string
-	 */
-	protected function getSubject() {
+
+	protected function getSubject() : string
+	{
 		if (is_array($this->subjectArgs) && !is_array($this->subject)) {
 			$thisValues = ((array)$this->get(FALSE, FALSE)) + $this->templateArgs;
 
 			$subjectFields = [$this->subjectDefault];
 			foreach ($this->subjectArgs as $v) {
-				if (!isset($thisValues[$v])) {
+				if ( !isset($thisValues[$v])) {
 					trigger_error('Missing ' . $v);
 					$thisValues[$v] = '';
 				}
@@ -196,55 +190,54 @@ class Email
 			return $this->subject;
 		}
 	}
-	/**
-	 * @param string $content
-	 * @return $this
-	 */
-	function content($content) {
+
+	function content(string $content) : self
+	{
 		$this->content = $content;
 
 		return $this;
 	}
-	/**
-	 * @param string $template
-	 * @return $this
-	 */
-	function template($template) {
+
+	function template(string $template) : self
+	{
 		$this->template = $template;
 
 		return $this;
 	}
-	/**
-	 * @param array $args
-	 * @return $this
-	 */
-	function templateArgs(array $args) {
+
+	function templateArgs(array $args) : self
+	{
 		$this->templateArgs = $args;
 
 		return $this;
 	}
+
 	/**
 	 * @param $args
+	 *
 	 * @return $this
 	 *
 	 * @internal
 	 */
-	function templateArgsMinimum($args) {
+	function templateArgsMinimum($args) : self
+	{
 		$this->templateArgsMinimum = $args;
 
 		return $this;
 	}
 
-	public function addLatteSetupFilterCallback(callable $callback)
+	public function addLatteSetupFilterCallback(callable $callback) : void
 	{
 		$this->latteSetupFilterCallback[] = $callback;
 	}
 
-	public function addAttachment($file, $content = NULL, $contentType = NULL) {
+	public function addAttachment($file, $content = NULL, $contentType = NULL) : void
+	{
 		$this->attachments[] = [$file, $content, $contentType];
 	}
 
-	function get($validate = TRUE, $parseSubject = TRUE) {
+	function get(bool $validate = TRUE, bool $parseSubject = TRUE)
+	{
 		$required = [
 			'from',
 			'to',
@@ -262,17 +255,16 @@ class Email
 			'content'     => $this->content,
 			'attachments' => $this->attachments,
 		];
-		if (!is_null($this->unsubscribeEmail)) {
+		if ( !is_null($this->unsubscribeEmail)) {
 			$args['unsubscribeEmail'] = $this->unsubscribeEmail;
 		}
-		if (!is_null($this->unsubscribeLink)) {
+		if ( !is_null($this->unsubscribeLink)) {
 			$args['unsubscribeLink'] = $this->unsubscribeLink;
 		}
 
-
 		if (is_null($this->content) && !is_null($this->template)) {
 			foreach ($this->templateArgsMinimum as $v) {
-				if (!isset($this->templateArgs[$v])) {
+				if ( !isset($this->templateArgs[$v])) {
 					if ($validate) {
 						trigger_error('Missing templateArgs.' . $v);
 						$this->templateArgs[$v] = '';

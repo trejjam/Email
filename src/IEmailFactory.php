@@ -1,17 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jam
- * Date: 14.2.15
- * Time: 21:54
- */
+declare(strict_types=1);
 
 namespace Trejjam\Email;
 
-
-use Nette,
-	Latte,
-	Trejjam;
+use Trejjam;
 
 interface IEmailFactory
 {
@@ -20,5 +12,5 @@ interface IEmailFactory
 	 * @param string|null $fromName
 	 * @return Email
 	 */
-	function create($from, $fromName = NULL);
+	function create(string $from, string $fromName = NULL);
 }

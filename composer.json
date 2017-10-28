@@ -14,7 +14,7 @@
 		}
 	],
 	"require": {
-		"php": ">=5.4",
+		"php": ">=7.1",
 		"nette/di": "~2.3",
 		"nette/application": "~2.3",
 		"nette/utils": "~2.3",
@@ -28,10 +28,7 @@
 	"autoload": {
 		"psr-4": {
 			"Trejjam\\Email\\": "src/"
-		},
-		"classmap": [
-			"src/exceptions.php"
-		]
+		}
 	},
 	"extra": {
 		"branch-alias": {
