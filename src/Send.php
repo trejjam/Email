@@ -32,15 +32,15 @@ class Send
 	 */
 	protected $mailer;
 	/**
-	 * @var string
+	 * @var string|null
 	 */
 	protected $locale = NULL;
 
 	function __construct(
-		$templateDirectory,
-		$configurations,
-		$useTranslator,
-		$subjectPrefix,
+		string $templateDirectory,
+		array $configurations,
+		bool $useTranslator,
+		string $subjectPrefix,
 		IEmailFactory $email,
 		Nette\Mail\IMailer $mailer
 	) {
@@ -52,17 +52,17 @@ class Send
 		$this->subjectPrefix = $subjectPrefix;
 	}
 
-	protected function setLocale($locale)
+	protected function setLocale(?string $locale)
 	{
 		$this->locale = $locale;
 	}
 
-	protected function getLocale($locale = NULL)
+	protected function getLocale(?string $locale = NULL)
 	{
 		return (!is_null($locale) ? $locale : $this->locale);
 	}
 
-	protected function getLocaleDir($configuration, $locale)
+	protected function getLocaleDir(array $configuration, ?string $locale)
 	{
 		if (
 			$this->useTranslator
@@ -77,17 +77,17 @@ class Send
 	}
 
 	/**
-	 * @param            $name
-	 * @param            $emailFrom
-	 * @param bool       $emailFromName
-	 * @param null       $locale
 	 * @param mixed|null $customAttribute
 	 *
-	 * @return Email
 	 * @throws EmailException
 	 */
-	public function getTemplate($name, $emailFrom, $emailFromName = FALSE, $locale = NULL, $customAttribute = NULL)
-	{
+	public function getTemplate(
+		string $name,
+		string $emailFrom,
+		string $emailFromName = NULL,
+		string $locale = NULL,
+		$customAttribute = NULL
+	) : Email {
 		if (isset($this->configurations[$name])) {
 			$configuration = $this->configurations[$name];
 
@@ -115,13 +115,13 @@ class Send
 	}
 
 	/**
-	 * @param string      $templateName
-	 * @param string|null $locale
-	 *
-	 * @return string
+	 * @param mixed|null $customAttribute
 	 */
-	protected function getTemplateFile($templateName, $locale = NULL, $customAttribute = NULL)
-	{
+	protected function getTemplateFile(
+		string $templateName,
+		string $locale = NULL,
+		$customAttribute = NULL
+	) : string {
 		$configuration = $this->configurations[$templateName];
 
 		$templateFile = is_null($configuration['template']) ? $templateName : $configuration['template'];
@@ -132,7 +132,7 @@ class Send
 			. '.latte';
 	}
 
-	public function send(Email $email, Nette\Mail\IMailer $mailer = NULL)
+	public function send(Email $email, Nette\Mail\IMailer $mailer = NULL) : void
 	{
 		$mailer = $mailer ?: $this->mailer;
 
