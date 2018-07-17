@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Trejjam\Email;
 
 use Nette;
+use Nette\Mail\MimePart;
 use Trejjam;
 
 class Email
@@ -43,6 +44,10 @@ class Email
 	 * @var array
 	 */
 	protected $attachments = [];
+	/**
+	 * @var MimePart[]
+	 */
+	protected $inlinePart = [];
 
 	/**
 	 * @var callable[]
@@ -236,6 +241,11 @@ class Email
 		$this->attachments[] = [$file, $content, $contentType];
 	}
 
+	public function addInlinePart(MimePart $part) : void
+	{
+		$this->inlinePart[] = $part;
+	}
+
 	function get(bool $validate = TRUE, bool $parseSubject = TRUE)
 	{
 		$required = [
@@ -254,6 +264,7 @@ class Email
 			'subject'     => $parseSubject ? $this->getSubject() : $this->subjectDefault,
 			'content'     => $this->content,
 			'attachments' => $this->attachments,
+			'inlinePart'  => $this->inlinePart,
 		];
 		if ( !is_null($this->unsubscribeEmail)) {
 			$args['unsubscribeEmail'] = $this->unsubscribeEmail;

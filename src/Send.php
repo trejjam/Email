@@ -144,8 +144,11 @@ class Send
 			->addTo($data->to, $data->toName)
 			->setHtmlBody($data->content);
 
-		foreach ($data->attachments as $v) {
-			call_user_func_array([$mail, 'addAttachment'], $v);
+		foreach ($data->attachments as $attachment) {
+			call_user_func_array([$mail, 'addAttachment'], $attachment);
+		}
+		foreach ($data->inlinePart as $inlinePart) {
+			$mail->addInlinePart($inlinePart);
 		}
 
 		if (isset($data->unsubscribeEmail) || isset($data->unsubscribeLink)) {
