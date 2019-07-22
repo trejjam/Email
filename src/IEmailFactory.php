@@ -7,10 +7,5 @@ use Trejjam;
 
 interface IEmailFactory
 {
-	/**
-	 * @param string      $from
-	 * @param string|null $fromName
-	 * @return Email
-	 */
-	function create(string $from, string $fromName = NULL);
+	function create(string $from, string $fromName = null) : Email;
 }

@@ -2,7 +2,7 @@
 
 namespace Trejjam\Email;
 
-use Nette;
+use Nette\Mail\Mailer;
 use Trejjam;
 
 class Send
@@ -28,7 +28,7 @@ class Send
 	 */
 	protected $emailFactory;
 	/**
-	 * @var Nette\Mail\IMailer
+	 * @var Mailer
 	 */
 	protected $mailer;
 	/**
@@ -42,7 +42,7 @@ class Send
 		bool $useTranslator,
 		string $subjectPrefix,
 		IEmailFactory $email,
-		Nette\Mail\IMailer $mailer
+		Mailer $mailer
 	) {
 		$this->templateDirectory = $templateDirectory;
 		$this->configurations = $configurations;
@@ -132,7 +132,7 @@ class Send
 			. '.latte';
 	}
 
-	public function send(Email $email, Nette\Mail\IMailer $mailer = NULL) : void
+	public function send(Email $email, Mailer $mailer = NULL) : void
 	{
 		$mailer = $mailer ?: $this->mailer;
 
