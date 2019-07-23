@@ -8,6 +8,7 @@ use Nette\Application\LinkGenerator;
 use Nette\Bridges\ApplicationLatte\ILatteFactory;
 use Nette\Bridges\ApplicationLatte\UIMacros;
 use Nette\Http\UrlScript;
+use Nette\Http\Request;
 use Nette\Utils\Validators;
 
 class Email
