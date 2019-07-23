@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace Trejjam\Email\DI;
 
-use Nette;
-use Trejjam;
+use Nette\DI\ServiceDefinition;
+use Trejjam\Email\Send;
+use Trejjam\Email\IEmailFactory;
+use Trejjam\BaseExtension\DI\BaseExtension;
 
-class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
+class EmailExtension extends BaseExtension
 {
 	protected $default = [
 		'templateDirectory' => 'presenters/templates/emails',
@@ -24,11 +26,11 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 	];
 
 	protected $classesDefinition = [
-		'send' => Trejjam\Email\Send::class,
+		'send' => Send::class,
 	];
 
 	protected $factoriesDefinition = [
-		'emailFactory' => Trejjam\Email\IEmailFactory::class,
+		'emailFactory' => IEmailFactory::class,
 	];
 
 	public function loadConfiguration(bool $validateConfig = TRUE) : void
@@ -58,7 +60,7 @@ class EmailExtension extends Trejjam\BaseExtension\DI\BaseExtension
 		$this->registerEmailFactory($types['send'], $this->config);
 	}
 
-	public function registerEmailFactory(Nette\DI\ServiceDefinition $factory, array $config)
+	public function registerEmailFactory(ServiceDefinition $factory, array $config)
 	{
 		$factory->setArguments(
 			[

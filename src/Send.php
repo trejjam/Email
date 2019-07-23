@@ -3,7 +3,7 @@
 namespace Trejjam\Email;
 
 use Nette\Mail\Mailer;
-use Trejjam;
+use Nette\Mail\Message;
 
 class Send
 {
@@ -137,7 +137,7 @@ class Send
 		$mailer = $mailer ?: $this->mailer;
 
 		$data = $email->get();
-		$mail = new Nette\Mail\Message;
+		$mail = new Message;
 		$mail
 			->setFrom($data->from, $data->fromName)
 			->addReplyTo($data->replyTo, $data->replyToName)

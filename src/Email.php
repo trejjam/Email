@@ -3,22 +3,25 @@ declare(strict_types=1);
 
 namespace Trejjam\Email;
 
-use Nette;
 use Nette\Mail\MimePart;
-use Trejjam;
+use Nette\Application\LinkGenerator;
+use Nette\Bridges\ApplicationLatte\ILatteFactory;
+use Nette\Bridges\ApplicationLatte\UIMacros;
+use Nette\Http\UrlScript;
+use Nette\Utils\Validators;
 
 class Email
 {
 	/**
-	 * @var Nette\Bridges\ApplicationLatte\ILatteFactory
+	 * @var ILatteFactory
 	 */
 	protected $latteFactory;
 	/**
-	 * @var Nette\Application\LinkGenerator
+	 * @var LinkGenerator
 	 */
 	protected $linkGenerator;
 	/**
-	 * @var Nette\Http\UrlScript
+	 * @var UrlScript
 	 */
 	protected $refUrl;
 
@@ -57,9 +60,9 @@ class Email
 	public function __construct(
 		string $from,
 		string $fromName = NULL,
-		Nette\Bridges\ApplicationLatte\ILatteFactory $latteFactory,
-		Nette\Application\LinkGenerator $linkGenerator,
-		Nette\Http\Request $httpRequest
+		ILatteFactory $latteFactory,
+		LinkGenerator $linkGenerator,
+		Request $httpRequest
 	) {
 		$this->from($from, $fromName);
 		$this->latteFactory = $latteFactory;
@@ -75,7 +78,7 @@ class Email
 	 */
 	public function unsubscribeEmail($unsubscribeEmail) : self
 	{
-		if ( !Nette\Utils\Validators::isEmail($unsubscribeEmail)) {
+		if ( !Validators::isEmail($unsubscribeEmail)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
 
@@ -86,7 +89,7 @@ class Email
 
 	public function unsubscribeLink(string $unsubscribeLink) : self
 	{
-		if ( !Nette\Utils\Validators::isUrl($unsubscribeLink)) {
+		if ( !Validators::isUrl($unsubscribeLink)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
 
@@ -97,7 +100,7 @@ class Email
 
 	public function from(string $from, string $name = NULL) : self
 	{
-		if ( !Nette\Utils\Validators::isEmail($from)) {
+		if ( !Validators::isEmail($from)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
 
@@ -109,7 +112,7 @@ class Email
 
 	public function to(string $to, string $name = NULL) : self
 	{
-		if ( !Nette\Utils\Validators::isEmail($to)) {
+		if ( !Validators::isEmail($to)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
 
@@ -121,7 +124,7 @@ class Email
 
 	public function replyTo(string $to, string $name = NULL) : self
 	{
-		if ( !Nette\Utils\Validators::isEmail($to)) {
+		if ( !Validators::isEmail($to)) {
 			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
 		}
 
@@ -289,7 +292,7 @@ class Email
 				$latte->addProvider('uiControl', $this->linkGenerator);
 				$latte->addProvider('uiPresenter', $this->linkGenerator);
 				$args['_url'] = $this->refUrl;
-				Nette\Bridges\ApplicationLatte\UIMacros::install($latte->getCompiler());
+				UIMacros::install($latte->getCompiler());
 
 				foreach ($this->latteSetupFilterCallback as $v) {
 					$v($latte);
