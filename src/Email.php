@@ -5,314 +5,285 @@ namespace Trejjam\Email;
 
 use Nette\Mail\MimePart;
 use Nette\Application\LinkGenerator;
-use Nette\Bridges\ApplicationLatte\ILatteFactory;
+use Nette\Bridges\ApplicationLatte\LatteFactory;
 use Nette\Bridges\ApplicationLatte\UIMacros;
 use Nette\Http\UrlScript;
 use Nette\Http\Request;
 use Nette\Utils\Validators;
+use stdClass;
 
 class Email
 {
-	/**
-	 * @var ILatteFactory
-	 */
-	protected $latteFactory;
-	/**
-	 * @var LinkGenerator
-	 */
-	protected $linkGenerator;
-	/**
-	 * @var UrlScript
-	 */
-	protected $refUrl;
+    protected UrlScript $refUrl;
 
-	protected $from;
-	protected $fromName;
-	protected $to;
-	protected $toName;
-	protected $replyTo;
-	protected $replyToName;
-	protected $subject;
-	protected $subjectDefault = '';
-	protected $subjectArgs;
+    protected string|null $to;
+    protected string|null $toName;
+    protected string|null $replyTo;
+    protected string|null $replyToName;
+    /**
+     * @var string|string[]|null
+     */
+    protected string|array|null $subject;
+    protected string|null $subjectDefault = '';
+    protected array|null $subjectArgs;
 
-	protected $content;
+    protected string|null $content;
 
-	protected $template;
-	protected $templateArgs        = [];
-	protected $templateArgsMinimum = [];
+    protected string|null $template;
+    protected array $templateArgs = [];
+    protected array $templateArgsMinimum = [];
 
-	protected $unsubscribeEmail;
-	protected $unsubscribeLink;
-	/**
-	 * @var array
-	 */
-	protected $attachments = [];
-	/**
-	 * @var MimePart[]
-	 */
-	protected $inlinePart = [];
+    protected string|null $unsubscribeEmail;
+    protected string|null $unsubscribeLink;
+    protected array $attachments = [];
+    /**
+     * @var MimePart[]
+     */
+    protected array $inlinePart = [];
 
-	/**
-	 * @var callable[]
-	 */
-	protected $latteSetupFilterCallback = [];
+    /**
+     * @var callable[]
+     */
+    protected array $latteSetupFilterCallback = [];
 
-	public function __construct(
-		string $from,
-		string $fromName = NULL,
-		ILatteFactory $latteFactory,
-		LinkGenerator $linkGenerator,
-		Request $httpRequest
-	) {
-		$this->from($from, $fromName);
-		$this->latteFactory = $latteFactory;
-		$this->linkGenerator = $linkGenerator;
-		$this->refUrl = $httpRequest->getUrl();
-	}
+    public function __construct(
+        private string                 $from,
+        private string|null            $fromName,
+        private readonly LatteFactory  $latteFactory,
+        private readonly LinkGenerator $linkGenerator,
+        Request                        $httpRequest
+    )
+    {
+        $this->from($from, $fromName);
+        $this->refUrl = $httpRequest->getUrl();
+    }
 
-	/**
-	 * @param string $unsubscribeEmail
-	 *
-	 * @return $this
-	 * @throws EmailException
-	 */
-	public function unsubscribeEmail($unsubscribeEmail) : self
-	{
-		if ( !Validators::isEmail($unsubscribeEmail)) {
-			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
-		}
+    /**
+     * @throws EmailException
+     */
+    public function unsubscribeEmail(string $unsubscribeEmail): self
+    {
+        if (!Validators::isEmail($unsubscribeEmail)) {
+            throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
+        }
 
-		$this->unsubscribeEmail = $unsubscribeEmail;
+        $this->unsubscribeEmail = $unsubscribeEmail;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	public function unsubscribeLink(string $unsubscribeLink) : self
-	{
-		if ( !Validators::isUrl($unsubscribeLink)) {
-			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
-		}
+    public function unsubscribeLink(string $unsubscribeLink): self
+    {
+        if (!Validators::isUrl($unsubscribeLink)) {
+            throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
+        }
 
-		$this->unsubscribeLink = $unsubscribeLink;
+        $this->unsubscribeLink = $unsubscribeLink;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	public function from(string $from, string $name = NULL) : self
-	{
-		if ( !Validators::isEmail($from)) {
-			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
-		}
+    public function from(string $from, string $name = null): self
+    {
+        if (!Validators::isEmail($from)) {
+            throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
+        }
 
-		$this->from = $from;
-		$this->fromName = $name;
+        $this->from = $from;
+        $this->fromName = $name;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	public function to(string $to, string $name = NULL) : self
-	{
-		if ( !Validators::isEmail($to)) {
-			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
-		}
+    public function to(string $to, string $name = null): self
+    {
+        if (!Validators::isEmail($to)) {
+            throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
+        }
 
-		$this->to = $to;
-		$this->toName = $name;
+        $this->to = $to;
+        $this->toName = $name;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	public function replyTo(string $to, string $name = NULL) : self
-	{
-		if ( !Validators::isEmail($to)) {
-			throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
-		}
+    public function replyTo(string $to, string $name = null): self
+    {
+        if (!Validators::isEmail($to)) {
+            throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
+        }
 
-		$this->replyTo = $to;
-		$this->replyToName = $name;
+        $this->replyTo = $to;
+        $this->replyToName = $name;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * @param string $subject
-	 *
-	 * @return $this
-	 * @internal
-	 */
-	public function defaultSubject(string $subject) : self
-	{
-		$this->subjectDefault = $subject;
+    /**
+     * @internal
+     */
+    public function defaultSubject(string $subject): self
+    {
+        $this->subjectDefault = $subject;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * @param string|string[] $subject
-	 *
-	 * @return $this
-	 */
-	public function subject($subject) : self
-	{
-		$this->subject = $subject;
+    /**
+     * @param string|string[] $subject
+     */
+    public function subject(string|array $subject): self
+    {
+        $this->subject = $subject;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * @param string[] $args
-	 *
-	 * @return $this
-	 * @internal
-	 */
-	public function subjectArgs(array $args = NULL) : self
-	{
-		$this->subjectArgs = $args;
+    /**
+     * @param string[] $args
+     *
+     * @internal
+     */
+    public function subjectArgs(array $args = null): self
+    {
+        $this->subjectArgs = $args;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	protected function getSubject() : string
-	{
-		if (is_array($this->subjectArgs) && !is_array($this->subject)) {
-			$thisValues = ((array)$this->get(FALSE, FALSE)) + $this->templateArgs;
+    protected function getSubject(): string
+    {
+        if (is_array($this->subjectArgs) && !is_array($this->subject)) {
+            $thisValues = ((array)$this->get(FALSE, FALSE)) + $this->templateArgs;
 
-			$subjectFields = [$this->subjectDefault];
-			foreach ($this->subjectArgs as $v) {
-				if ( !isset($thisValues[$v])) {
-					trigger_error('Missing ' . $v);
-					$thisValues[$v] = '';
-				}
-				$subjectFields[] = $thisValues[$v];
-			}
+            $subjectFields = [$this->subjectDefault];
+            foreach ($this->subjectArgs as $v) {
+                if (!isset($thisValues[$v])) {
+                    trigger_error('Missing ' . $v);
+                    $thisValues[$v] = '';
+                }
+                $subjectFields[] = $thisValues[$v];
+            }
 
-			return call_user_func_array('sprintf', $subjectFields);
-		}
-		else if (is_null($this->subject)) {
-			return $this->subjectDefault;
-		}
-		else if (is_array($this->subject)) {
-			return call_user_func_array('sprintf', array_merge([$this->subjectDefault], $this->subject));
-		}
-		else {
-			return $this->subject;
-		}
-	}
+            return call_user_func_array('sprintf', $subjectFields);
+        } else if (is_null($this->subject)) {
+            return $this->subjectDefault;
+        } else if (is_array($this->subject)) {
+            return call_user_func_array('sprintf', array_merge([$this->subjectDefault], $this->subject));
+        } else {
+            return $this->subject;
+        }
+    }
 
-	function content(string $content) : self
-	{
-		$this->content = $content;
+    function content(string $content): self
+    {
+        $this->content = $content;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	function template(string $template) : self
-	{
-		$this->template = $template;
+    function template(string $template): self
+    {
+        $this->template = $template;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	function templateArgs(array $args) : self
-	{
-		$this->templateArgs = $args;
+    function templateArgs(array $args): self
+    {
+        $this->templateArgs = $args;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * @param $args
-	 *
-	 * @return $this
-	 *
-	 * @internal
-	 */
-	function templateArgsMinimum($args) : self
-	{
-		$this->templateArgsMinimum = $args;
+    /**
+     * @internal
+     */
+    function templateArgsMinimum($args): self
+    {
+        $this->templateArgsMinimum = $args;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	public function addLatteSetupFilterCallback(callable $callback) : void
-	{
-		$this->latteSetupFilterCallback[] = $callback;
-	}
+    public function addLatteSetupFilterCallback(callable $callback): void
+    {
+        $this->latteSetupFilterCallback[] = $callback;
+    }
 
-	public function addAttachment($file, $content = NULL, $contentType = NULL) : void
-	{
-		$this->attachments[] = [$file, $content, $contentType];
-	}
+    public function addAttachment($file, $content = NULL, $contentType = NULL): void
+    {
+        $this->attachments[] = [$file, $content, $contentType];
+    }
 
-	public function addInlinePart(MimePart $part) : void
-	{
-		$this->inlinePart[] = $part;
-	}
+    public function addInlinePart(MimePart $part): void
+    {
+        $this->inlinePart[] = $part;
+    }
 
-	function get(bool $validate = TRUE, bool $parseSubject = TRUE)
-	{
-		$required = [
-			'from',
-			'to',
-			'subject',
-			'content',
-		];
-		$args = [
-			'from'        => $this->from,
-			'fromName'    => $this->fromName,
-			'to'          => $this->to,
-			'toName'      => $this->toName,
-			'replyTo'     => is_null($this->replyTo) ? $this->from : $this->replyTo,
-			'replyToName' => is_null($this->replyTo) ? $this->fromName : $this->replyToName,
-			'subject'     => $parseSubject ? $this->getSubject() : $this->subjectDefault,
-			'content'     => $this->content,
-			'attachments' => $this->attachments,
-			'inlinePart'  => $this->inlinePart,
-		];
-		if ( !is_null($this->unsubscribeEmail)) {
-			$args['unsubscribeEmail'] = $this->unsubscribeEmail;
-		}
-		if ( !is_null($this->unsubscribeLink)) {
-			$args['unsubscribeLink'] = $this->unsubscribeLink;
-		}
+    function get(bool $validate = TRUE, bool $parseSubject = true) : stdClass
+    {
+        $required = [
+            'from',
+            'to',
+            'subject',
+            'content',
+        ];
+        $args = [
+            'from' => $this->from,
+            'fromName' => $this->fromName,
+            'to' => $this->to,
+            'toName' => $this->toName,
+            'replyTo' => is_null($this->replyTo) ? $this->from : $this->replyTo,
+            'replyToName' => is_null($this->replyTo) ? $this->fromName : $this->replyToName,
+            'subject' => $parseSubject ? $this->getSubject() : $this->subjectDefault,
+            'content' => $this->content,
+            'attachments' => $this->attachments,
+            'inlinePart' => $this->inlinePart,
+        ];
+        if (!is_null($this->unsubscribeEmail)) {
+            $args['unsubscribeEmail'] = $this->unsubscribeEmail;
+        }
+        if (!is_null($this->unsubscribeLink)) {
+            $args['unsubscribeLink'] = $this->unsubscribeLink;
+        }
 
-		if (is_null($this->content) && !is_null($this->template)) {
-			foreach ($this->templateArgsMinimum as $v) {
-				if ( !isset($this->templateArgs[$v])) {
-					if ($validate) {
-						trigger_error('Missing templateArgs.' . $v);
-						$this->templateArgs[$v] = '';
-					}
-				}
-			}
+        if (is_null($this->content) && !is_null($this->template)) {
+            foreach ($this->templateArgsMinimum as $v) {
+                if (!isset($this->templateArgs[$v])) {
+                    if ($validate) {
+                        trigger_error('Missing templateArgs.' . $v);
+                        $this->templateArgs[$v] = '';
+                    }
+                }
+            }
 
-			if ($validate) {
-				$latte = $this->latteFactory->create();
+            if ($validate) {
+                $latte = $this->latteFactory->create();
 
-				$latte->addProvider('uiControl', $this->linkGenerator);
-				$latte->addProvider('uiPresenter', $this->linkGenerator);
-				$args['_url'] = $this->refUrl;
-				UIMacros::install($latte->getCompiler());
+                $latte->addProvider('uiControl', $this->linkGenerator);
+                $latte->addProvider('uiPresenter', $this->linkGenerator);
+                $args['_url'] = $this->refUrl;
+                UIMacros::install($latte->getCompiler());
 
-				foreach ($this->latteSetupFilterCallback as $v) {
-					$v($latte);
-				}
+                foreach ($this->latteSetupFilterCallback as $v) {
+                    $v($latte);
+                }
 
-				$args['content'] = $latte->renderToString($this->template, $args + $this->templateArgs);
-			}
-		}
+                $args['content'] = $latte->renderToString($this->template, $args + $this->templateArgs);
+            }
+        }
 
-		foreach ($required as $v) {
-			if (is_null($args[$v])) {
-				if ($validate) {
-					trigger_error('Missing ' . $v);
-					$args[$v] = '';
-				}
-			}
-		}
+        foreach ($required as $v) {
+            if (is_null($args[$v])) {
+                if ($validate) {
+                    trigger_error('Missing ' . $v);
+                    $args[$v] = '';
+                }
+            }
+        }
 
-		return (object)$args;
-	}
+        return (object)$args;
+    }
 }
 

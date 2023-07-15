@@ -3,72 +3,52 @@ declare(strict_types=1);
 
 namespace Trejjam\Email\DI;
 
-use Nette\DI\ServiceDefinition;
+use Nette\DI\CompilerExtension;
+use Nette\Schema\Expect;
+use Nette\Schema\Schema;
 use Trejjam\Email\Send;
 use Trejjam\Email\IEmailFactory;
-use Trejjam\BaseExtension\DI\BaseExtension;
 
-class EmailExtension extends BaseExtension
+final class EmailExtension extends CompilerExtension
 {
-	protected $default = [
-		'templateDirectory' => 'presenters/templates/emails',
-		'templates'         => [],
-		'useTranslator'     => FALSE,
-		'subjectPrefix'     => '',
-	];
+    public function getConfigSchema(): Schema
+    {
+        return Expect::structure([
+            'templateDirectory' => Expect::string()->default('presenters/templates/emails'),
+            'templates' => Expect::arrayOf(
+                Expect::structure([
+                    'subject' => Expect::string()->nullable()->default(null),
+                    'subjectFields' => Expect::string()->nullable()->default(null),
+                    'template' => Expect::string()->nullable()->default(null),
+                    'requiredFields' => Expect::string()->default([]),
+                    'useTranslator' => Expect::string()->nullable()->default(null),
+                ]),
+                Expect::int()
+            ),
+            'useTranslator' => Expect::bool()->default(false),
+            'subjectPrefix' => Expect::string()->default(''),
+        ]);
+    }
 
-	protected $templates = [
-		'subject'        => NULL,
-		'subjectFields'  => NULL,
-		'template'       => NULL,
-		'requiredFields' => [],
-		'useTranslator'  => TRUE,
-	];
+    public function beforeCompile(): void
+    {
+        parent::beforeCompile();
 
-	protected $classesDefinition = [
-		'send' => Send::class,
-	];
+        $builder = $this->getContainerBuilder();
 
-	protected $factoriesDefinition = [
-		'emailFactory' => IEmailFactory::class,
-	];
+        $templateDirectory = $this->getContainerBuilder()->parameters['appDir'] . DIRECTORY_SEPARATOR . $this->config->templateDirectory;
 
-	public function loadConfiguration(bool $validateConfig = TRUE) : void
-	{
-		$this->default['templateDirectory'] = $this->getContainerBuilder()->parameters['appDir'] . DIRECTORY_SEPARATOR . $this->default['templateDirectory'];
+        $builder->addDefinition($this->prefix('send'))
+            ->setType(Send::class)
+            ->setArguments([
+                'templateDirectory' => $templateDirectory,
+                'templates' => $this->config->templates,
+                'useTranslator' => $this->config->useTranslator,
+                'subjectPrefix' => $this->config->subjectPrefix,
+            ]);
 
-		$config = $this->config;
+        $builder->addDefinition($this->prefix('emailFactory'))
+            ->setFactory(IEmailFactory::class);
+    }
 
-		if (
-			array_key_exists('templates', $config)
-			&& is_array($config['templates'])
-		) {
-			foreach ($config['templates'] as $k => $v) {
-				$this->default['templates'][$k] = $this->templates;
-			}
-		}
-
-		parent::loadConfiguration();
-	}
-
-	public function beforeCompile() : void
-	{
-		parent::beforeCompile();
-
-		$types = $this->getTypes();
-
-		$this->registerEmailFactory($types['send'], $this->config);
-	}
-
-	public function registerEmailFactory(ServiceDefinition $factory, array $config)
-	{
-		$factory->setArguments(
-			[
-				$config['templateDirectory'],
-				$config['templates'],
-				$config['useTranslator'],
-				$config['subjectPrefix'],
-			]
-		);
-	}
 }
