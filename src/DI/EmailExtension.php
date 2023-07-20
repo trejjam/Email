@@ -49,8 +49,8 @@ final class EmailExtension extends CompilerExtension
                 'subjectPrefix' => $this->config->subjectPrefix,
             ]);
 
-        $builder->addDefinition($this->prefix('emailFactory'))
-            ->setFactory(IEmailFactory::class);
+        $builder->addFactoryDefinition($this->prefix('emailFactory'))
+            ->setImplement(IEmailFactory::class);
     }
 
 }
