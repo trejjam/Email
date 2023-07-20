@@ -23,7 +23,7 @@ final class EmailExtension extends CompilerExtension
                     'requiredFields' => Expect::string()->default([]),
                     'useTranslator' => Expect::string()->nullable()->default(null),
                 ]),
-                Expect::int()
+                Expect::string()
             ),
             'useTranslator' => Expect::bool()->default(false),
             'subjectPrefix' => Expect::string()->default(''),
