@@ -43,12 +43,10 @@ final class EmailExtension extends CompilerExtension
 
         $builder = $this->getContainerBuilder();
 
-        $templateDirectory = $this->getContainerBuilder()->parameters['appDir'] . DIRECTORY_SEPARATOR . $this->config->templateDirectory;
-
         $builder->addDefinition($this->prefix('send'))
             ->setType(Send::class)
             ->setArguments([
-                'templateDirectory' => $templateDirectory,
+                'templateDirectory' => $this->config->templateDirectory,
                 'templates' => $this->config->templates,
                 'useTranslator' => $this->config->useTranslator,
                 'subjectPrefix' => $this->config->subjectPrefix,
