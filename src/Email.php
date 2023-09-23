@@ -263,15 +263,19 @@ class Email
             if ($validate) {
                 $latte = $this->latteFactory->create();
 
-                $latte->addProvider('uiControl', $this->linkGenerator);
-                $latte->addProvider('uiPresenter', $this->linkGenerator);
                 $args['_url'] = $this->refUrl;
 
                 if (version_compare(Engine::VERSION, '3', '<')) {
+                    $latte->addProvider('uiControl', $this->linkGenerator);
+                    $latte->addProvider('uiPresenter', $this->linkGenerator);
+
                     UIMacros::install($latte->getCompiler());
                 }
                 else {
                     $latte->addExtension(new UIExtension(null));
+
+                    $latte->addProvider('uiControl', $this->linkGenerator);
+                    $latte->addProvider('uiPresenter', $this->linkGenerator);
                 }
 
                 foreach ($this->latteSetupFilterCallback as $v) {
