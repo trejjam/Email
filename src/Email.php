@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Trejjam\Email;
 
+use Latte\Engine;
+use Nette\Bridges\ApplicationLatte\UIExtension;
 use Nette\Mail\MimePart;
 use Nette\Application\LinkGenerator;
 use Nette\Bridges\ApplicationLatte\LatteFactory;
@@ -264,7 +266,13 @@ class Email
                 $latte->addProvider('uiControl', $this->linkGenerator);
                 $latte->addProvider('uiPresenter', $this->linkGenerator);
                 $args['_url'] = $this->refUrl;
-                UIMacros::install($latte->getCompiler());
+
+                if (version_compare(Engine::VERSION, '3', '<')) {
+                    UIMacros::install($latte->getCompiler());
+                }
+                else {
+                    $latte->addExtension(new UIExtension(null));
+                }
 
                 foreach ($this->latteSetupFilterCallback as $v) {
                     $v($latte);
