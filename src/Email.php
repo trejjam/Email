@@ -18,23 +18,23 @@ class Email
 
     protected string|null $to;
     protected string|null $toName;
-    protected string|null $replyTo;
+    protected string|null $replyTo = null;
     protected string|null $replyToName;
     /**
      * @var string|string[]|null
      */
-    protected string|array|null $subject;
+    protected string|array|null $subject = null;
     protected string|null $subjectDefault = '';
     protected array|null $subjectArgs;
 
-    protected string|null $content;
+    protected string|null $content = null;
 
     protected string|null $template;
     protected array $templateArgs = [];
     protected array $templateArgsMinimum = [];
 
-    protected string|null $unsubscribeEmail;
-    protected string|null $unsubscribeLink;
+    protected string|null $unsubscribeEmail = null;
+    protected string|null $unsubscribeLink = null;
     protected array $attachments = [];
     /**
      * @var MimePart[]
@@ -221,7 +221,7 @@ class Email
         $this->inlinePart[] = $part;
     }
 
-    function get(bool $validate = TRUE, bool $parseSubject = true) : stdClass
+    function get(bool $validate = TRUE, bool $parseSubject = true): stdClass
     {
         $required = [
             'from',
