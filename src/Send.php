@@ -11,6 +11,7 @@ class Send
 
     function __construct(
         private readonly string        $templateDirectory,
+        /** @var $templates array<string, EmailTemplate> */
         private readonly array         $templates,
         private readonly bool          $useTranslator,
         private readonly string        $subjectPrefix,
@@ -20,21 +21,21 @@ class Send
     {
     }
 
-    protected function setLocale(string|null $locale)
+    protected function setLocale(string|null $locale): void
     {
         $this->locale = $locale;
     }
 
-    protected function getLocale(string|null $locale = null)
+    protected function getLocale(string|null $locale = null): string|null
     {
         return $locale ?? $this->locale;
     }
 
-    protected function getLocaleDir(array $configuration, ?string $locale)
+    protected function getLocaleDir(EmailTemplate $configuration, ?string $locale): string
     {
         if (
             $this->useTranslator
-            && $configuration['useTranslator']
+            && $configuration->useTranslator
             && !is_null($this->getLocale($locale))
         ) {
             return $this->getLocale($locale) . '/';
@@ -51,7 +52,7 @@ class Send
         string $emailFrom,
         string $emailFromName = null,
         string $locale = null,
-               $customAttribute = null
+        mixed  $customAttribute = null
     ): Email
     {
         if (isset($this->templates[$name])) {
@@ -67,10 +68,10 @@ class Send
                 ->template($template)
                 ->defaultSubject(
                     $this->useTranslator
-                    && $configuration['useTranslator']
+                    && $configuration->useTranslator
                     && !is_null($this->getLocale($locale))
-                        ? $configuration['locale'][$this->getLocale($locale)]['subject']
-                        : $configuration['subject']
+                        ? $configuration->locale[$this->getLocale($locale)]->subject
+                        : $configuration->subject,
                 )
                 ->subjectArgs($configuration['subjectFields'])
                 ->templateArgsMinimum($configuration['requiredFields']);
@@ -82,12 +83,12 @@ class Send
     protected function getTemplateFile(
         string $templateName,
         string $locale = null,
-               $customAttribute = null
+        mixed  $customAttribute = null
     ): string
     {
         $configuration = $this->templates[$templateName];
 
-        $templateFile = is_null($configuration['template']) ? $templateName : $configuration['template'];
+        $templateFile = is_null($configuration->template) ? $templateName : $configuration->template;
 
         return $this->templateDirectory . '/'
             . $this->getLocaleDir($configuration, $locale)
