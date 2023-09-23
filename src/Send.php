@@ -73,8 +73,8 @@ class Send
                         ? $configuration->locale[$this->getLocale($locale)]->subject
                         : $configuration->subject,
                 )
-                ->subjectArgs($configuration['subjectFields'])
-                ->templateArgsMinimum($configuration['requiredFields']);
+                ->subjectArgs($configuration->subjectFields)
+                ->templateArgsMinimum($configuration->requiredFields);
         } else {
             throw new EmailException('Template not exist', EmailException::TEMPLATE_NOT_FOUND);
         }
