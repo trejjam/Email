@@ -6,6 +6,8 @@ namespace Trejjam\Email\DI;
 use Nette\DI\CompilerExtension;
 use Nette\Schema\Expect;
 use Nette\Schema\Schema;
+use Trejjam\Email\EmailSubjectTemplate;
+use Trejjam\Email\EmailTemplate;
 use Trejjam\Email\Send;
 use Trejjam\Email\IEmailFactory;
 
@@ -16,16 +18,19 @@ final class EmailExtension extends CompilerExtension
         return Expect::structure([
             'templateDirectory' => Expect::string()->default('presenters/templates/emails'),
             'templates' => Expect::arrayOf(
-                Expect::structure([
+                Expect::from(new EmailTemplate, [
+                    'locale' => Expect::arrayOf(
+                        Expect::from(new EmailSubjectTemplate),
+                    ),
                     'subject' => Expect::string()->nullable()->default(null),
                     'subjectFields' => Expect::string()->nullable()->default(null),
                     'template' => Expect::string()->nullable()->default(null),
                     'requiredFields' => Expect::arrayOf(
                         Expect::string()
                     )->default([]),
-                    'useTranslator' => Expect::string()->nullable()->default(null),
+                    'useTranslator' => Expect::bool()->nullable()->default(null),
                 ]),
-                Expect::string()
+                Expect::string(),
             ),
             'useTranslator' => Expect::bool()->default(false),
             'subjectPrefix' => Expect::string()->default(''),
