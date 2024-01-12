@@ -18,20 +18,20 @@ class Email
 {
     protected UrlScript $refUrl;
 
-    protected string|null $to;
-    protected string|null $toName;
+    protected string|null $to = null;
+    protected string|null $toName = null;
     protected string|null $replyTo = null;
-    protected string|null $replyToName;
+    protected string|null $replyToName = null;
     /**
      * @var string|string[]|null
      */
     protected string|array|null $subject = null;
     protected string|null $subjectDefault = '';
-    protected array|null $subjectArgs;
+    protected array|null $subjectArgs = null;
 
     protected string|null $content = null;
 
-    protected string|null $template;
+    protected string|null $template = null;
     protected array $templateArgs = [];
     protected array $templateArgsMinimum = [];
 
