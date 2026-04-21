@@ -85,7 +85,7 @@ class Email
         return $this;
     }
 
-    public function from(string $from, string $name = null): self
+    public function from(string $from, string|null $name = null): self
     {
         if (!Validators::isEmail($from)) {
             throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
@@ -97,7 +97,7 @@ class Email
         return $this;
     }
 
-    public function to(string $to, string $name = null): self
+    public function to(string $to, string|null $name = null): self
     {
         if (!Validators::isEmail($to)) {
             throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
@@ -109,7 +109,7 @@ class Email
         return $this;
     }
 
-    public function replyTo(string $to, string $name = null): self
+    public function replyTo(string $to, string|null $name = null): self
     {
         if (!Validators::isEmail($to)) {
             throw new EmailException('Email is not valid', EmailException::INVALID_EMAIL);
@@ -146,7 +146,7 @@ class Email
      *
      * @internal
      */
-    public function subjectArgs(array $args = null): self
+    public function subjectArgs(array|null $args = null): self
     {
         $this->subjectArgs = $args;
 
