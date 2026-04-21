@@ -48,11 +48,11 @@ class Send
      * @throws EmailException
      */
     public function getTemplate(
-        string $name,
-        string $emailFrom,
-        string $emailFromName = null,
-        string $locale = null,
-        mixed  $customAttribute = null
+        string      $name,
+        string      $emailFrom,
+        string|null $emailFromName = null,
+        string|null $locale = null,
+        mixed       $customAttribute = null
     ): Email
     {
         if (isset($this->templates[$name])) {
@@ -81,9 +81,9 @@ class Send
     }
 
     protected function getTemplateFile(
-        string $templateName,
-        string $locale = null,
-        mixed  $customAttribute = null
+        string      $templateName,
+        string|null $locale = null,
+        mixed       $customAttribute = null
     ): string
     {
         $configuration = $this->templates[$templateName];
@@ -96,7 +96,7 @@ class Send
             . '.latte';
     }
 
-    public function send(Email $email, Mailer $mailer = null): void
+    public function send(Email $email, Mailer|null $mailer = null): void
     {
         $mailer = $mailer ?? $this->mailer;
 

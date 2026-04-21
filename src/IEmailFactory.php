@@ -5,5 +5,5 @@ namespace Trejjam\Email;
 
 interface IEmailFactory
 {
-	function create(string $from, string $fromName = null) : Email;
+	function create(string $from, string|null $fromName = null) : Email;
 }
